@@ -2,7 +2,8 @@
 ## Badges
 
 [![.github/workflows/release.yaml](https://github.com/sonikro/nodejs-api-aws-terraform-gha/actions/workflows/release.yaml/badge.svg?branch=main)](https://github.com/sonikro/nodejs-api-aws-terraform-gha/actions/workflows/release.yaml)
-[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 # nodejs-api-aws-terraform-gha
 
 This project is a sample NodeJS API with Typescript, and is being used to demonstrate the process of developing and deploying an application to production.
