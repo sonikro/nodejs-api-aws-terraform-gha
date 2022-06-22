@@ -3,6 +3,10 @@ name: Destroy Infrastructure
 on:
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   destroy-sandbox:
     name: Destroy Sandbox
@@ -15,8 +19,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::354429752491:role/github-actions-runner
+          role-session-name: action-runner
           aws-region: us-east-1
           mask-aws-account-id: 'no'
       
