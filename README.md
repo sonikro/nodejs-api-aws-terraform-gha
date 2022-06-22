@@ -81,13 +81,9 @@ To run tests, run the following command
 | :-------- | :------- | :-------------------------------- |
 | `body`      | `json` | Customer being added|
 
-## Github Secrets 
+## Integration between Github and AWS
 
-To run this Github Actions workflow, your repository needs 2 secrets:
+To connect your runner to your AWS Account, you need to setup an OIDC in AWS to allow your repository to assume a specific role.
+For more information, see [https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
 
-`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
-
-These secrets should be of an user that has all the necessary permissions to deploy the application to AWS
-
-
-> :warning: **Deploying this to your AWS Account will incurr costs**:
+> :warning: **Deploying this to your AWS Account will incur costs**:
