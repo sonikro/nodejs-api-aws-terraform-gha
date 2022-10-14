@@ -19,7 +19,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::354429752491:role/github-actions-runner
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-session-name: action-runner
           aws-region: us-east-1
           mask-aws-account-id: 'no'
