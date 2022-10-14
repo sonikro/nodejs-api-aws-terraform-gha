@@ -1,0 +1,32 @@
+[
+  {
+    "name": "${name}",
+    "environment": [
+      {
+        "name": "environment",
+        "value": "${environment}"
+      }
+    ],
+    "essential": true,
+    "image": "${image}",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${awslogs_group}",
+        "awslogs-region": "${region}",
+        "awslogs-stream-prefix": "${awslogs_stream_prefix}"
+      }
+    },
+    "memory": ${memory},
+    "cpu": ${cpu},
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": "FARGATE",
+    "portMappings": [
+      {
+        "containerPort": ${container_port},
+        "hostPort": ${container_port},
+        "protocol": "tcp"
+      }
+    ]
+  }
+]
