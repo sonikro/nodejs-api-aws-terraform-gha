@@ -4,6 +4,10 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   integrate:
     name: CI
@@ -18,3 +22,88 @@ jobs:
       
       - name: Run unit tests
         run: yarn test
+  
+  setup-registry:
+    needs:
+      - integrate
+    name: Setup Registry
+    runs-on: ubuntu-latest
+    container: alpine/terragrunt:1.1.4
+    env:
+      TF_INPUT: 0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: action-runner
+          aws-region: us-east-1
+          mask-aws-account-id: 'no'
+      
+      - name: Deploy Repository
+        id: deploy-repository
+        shell: sh
+        working-directory: terraform
+        run: |
+          terragrunt init
+          terragrunt apply -target=aws_ecr_repository.repository -auto-approve -var-file sandbox.tfvars -var commit_hash=${{github.sha}} -var repository_url='${{ github.repositoryUrl }}'
+          echo "::set-output name=repository_url::$(terragrunt output repository_url | tr -d '"')"
+        
+    outputs:
+      repository_url: ${{steps.deploy-repository.outputs.repository_url}}
+
+  deploy-docker:
+    needs:
+      - setup-registry
+    name: Deploy Docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: action-runner
+          aws-region: us-east-1
+          mask-aws-account-id: 'no'
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      
+      - name: Build
+        shell: bash
+        run: |
+          docker build -t ${{needs.setup-registry.outputs.repository_url}}:${{github.sha}} .
+          docker push ${{needs.setup-registry.outputs.repository_url}}:${{github.sha}}
+
+  deploy-sandbox:
+    needs:
+      - deploy-docker
+    name: Deploy Sandbox
+    runs-on: ubuntu-latest
+    container: alpine/terragrunt:1.1.4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: action-runner
+          aws-region: us-east-1
+          mask-aws-account-id: 'no'
+      
+      - name: Deploy
+        id: deploy
+        shell: sh
+        working-directory: terraform
+        run: |
+          terragrunt init
+          terragrunt apply -auto-approve -var-file sandbox.tfvars -var commit_hash=${{github.sha}} -var repository_url='${{ github.repositoryUrl }}'

@@ -1,0 +1,32 @@
+
+name: Destroy Infrastructure
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  destroy-sandbox:
+    name: Destroy Sandbox
+    runs-on: ubuntu-latest
+    container: alpine/terragrunt:1.1.4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::354429752491:role/github-actions-runner
+          role-session-name: action-runner
+          aws-region: us-east-1
+          mask-aws-account-id: 'no'
+      
+      - name: Destroy
+        shell: sh
+        working-directory: terraform
+        run: |
+          terragrunt init
+          terragrunt destroy -auto-approve -var-file sandbox.tfvars -var commit_hash=${{github.sha}} -var repository_url='${{ github.repositoryUrl }}'
